@@ -61,6 +61,7 @@
 					if(sessionStorage[this.href]){
 						//e.preventDefault();
 						document.querySelector('html').innerHTML = sessionStorage[this.href]; // Reemplazo el html acutal por el correspondiente a href.
+						siteAdaptationStorage = getLocalSite();
 						if (siteAdaptationStorage) {
 							siteAdaptation = siteAdaptationStorage;
 							if($.isArray(siteAdaptation)) {
