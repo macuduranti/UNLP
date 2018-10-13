@@ -45,9 +45,6 @@
 		if (confirm("Desea almacenar las páginas candidatas en el sessionStorage?")) {
 			saveCandidates();
 		}
-		else{
-			alert("No se almacenarán las páginas candidatas.");
-		}
 		checkStatus();
 	}
 
@@ -64,6 +61,19 @@
 					if(sessionStorage[this.href]){
 						//e.preventDefault();
 						document.querySelector('html').innerHTML = sessionStorage[this.href]; // Reemplazo el html acutal por el correspondiente a href.
+						if (siteAdaptationStorage) {
+							siteAdaptation = siteAdaptationStorage;
+							if($.isArray(siteAdaptation)) {
+								var index = indexOfCompareByEquals(siteAdaptation, pageUrl, "url");
+								if (index < 0) {
+									index = indexOfCompareByIncludes(siteAdaptation, pageUrl, "url");
+								}
+								if (index > -1) {
+									executePageAdaptation(index);
+								}
+							}
+						}
+
 					}
 					else{
 						//e.preventDefault();
@@ -85,7 +95,8 @@
 			}
 		});
 	}
-	 //Función que permite almacenar en sessionStorage todas las páginas candidato cacheables, filtrando las que pertenecen al dominio 
+
+	//Función que permite almacenar en sessionStorage todas las páginas candidato cacheables, filtrando las que pertenecen al dominio 
 	//en el que estoy y que no son enlaces internos. Luego, almacena también la página actual.
 	function saveCandidates(){
 		var aTag = document.getElementsByTagName("a");
