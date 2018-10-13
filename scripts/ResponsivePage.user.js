@@ -42,9 +42,12 @@
 				}
 			}
 		}
-		if (confirm("Desea almacenar las páginas candidatas en el sessionStorage?")) {
-			saveCandidates();
+		if (navigator.onLine){
+			if (confirm("Desea almacenar las páginas candidatas en el sessionStorage?")) {
+				saveCandidates();
+			}	
 		}
+
 		checkStatus();
 	}
 
@@ -61,19 +64,7 @@
 					if(sessionStorage[this.href]){
 						//e.preventDefault();
 						document.querySelector('html').innerHTML = sessionStorage[this.href]; // Reemplazo el html acutal por el correspondiente a href.
-						siteAdaptationStorage = getLocalSite();
-						if (siteAdaptationStorage) {
-							siteAdaptation = siteAdaptationStorage;
-							if($.isArray(siteAdaptation)) {
-								var index = indexOfCompareByEquals(siteAdaptation, pageUrl, "url");
-								if (index < 0) {
-									index = indexOfCompareByIncludes(siteAdaptation, pageUrl, "url");
-								}
-								if (index > -1) {
-									executePageAdaptation(index);
-								}
-							}
-						}
+						initialize();
 
 					}
 					else{
