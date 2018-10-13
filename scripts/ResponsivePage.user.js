@@ -50,7 +50,7 @@
 		}
 		checkStatus();
 	}
-	
+
 	 //Función que comprueba en cada click si la conexión es estable y adapta el comportamiento según el caso.
 	function checkStatus(){
 	 	$("html").on('click', 'a', function(e) {
@@ -126,31 +126,11 @@
 	}
 
 	function importJson() {
-		var myUrl = window.location.href;
-		var getReqCatalog = new XMLHttpRequest();
-		var urlCatalog = "http://localhost:3000/api/augmentations/?url=" + myUrl;
-		getReqCatalog.open("GET", urlCatalog, false);
-		getReqCatalog.setRequestHeader("Content-Type", "application/json");
-		getReqCatalog.send();
-		if (getReqCatalog.status == 200 || getReqCatalog.status == 400){
-			var xhrResponse = getReqCatalog.responseText;
-		}
+		var dataImport = prompt("Importar la configuración. Ingrese el JSON correspondiente");
 		/* La longitud debe tener un minimo de datos para asegurar la estructura inicial del Json. */
-		var siteImport = JSON.parse(xhrResponse);
-		if (/\d/.test(siteImport)){
-			var options = xhrResponse.split(","); // o siteImport
-		    getReqCatalog = new XMLHttpRequest();
-		    urlCatalog = "http://localhost:3000/api/augmentations/" + options[options.length - 1];
-		    getReqCatalog.open("GET", urlCatalog, false);
-		    getReqCatalog.setRequestHeader("Content-Type", "application/json");
-		    getReqCatalog.send();
-			if (getReqCatalog.status == 200 || getReqCatalog.status == 400){
-				xhrResponse = getReqCatalog.responseText;
-			}
-		}
-		if(xhrResponse.length >= 50 ){
-			siteImport = JSON.parse(xhrResponse);
-			if(Array.isArray(siteImport)) {
+		if(dataImport.length >= 50 ){
+			var siteImport = JSON.parse(dataImport);
+			if($.isArray(siteImport)) {
 				saveLocalSite(siteImport);
 				siteAdaptation = siteImport;
 				var index = indexOfCompareByEquals(siteAdaptation, pageUrl, "url");
