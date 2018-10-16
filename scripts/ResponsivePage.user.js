@@ -19,8 +19,8 @@
 		$('head script[src*="jquery"]').remove();
 	}
 
-	GM_registerMenuCommand('Importar configuración desde catálogo', importJson);
-	GM_registerMenuCommand('Eliminar datos almacenados', delLocalSite, "L");
+	GM_registerMenuCommand('Importar adaptación', importJson);
+	//GM_registerMenuCommand('Eliminar datos almacenados', delLocalSite, "L");
 
 	var siteAdaptation = [];
 	var pageUrl = window.location.href;
@@ -29,7 +29,7 @@
 	initialize();
 
 	function initialize() {	
-		var siteAdaptationStorage = getLocalSite();
+		var siteAdaptationStorage = siteAdaptation;
 		if (siteAdaptationStorage) {
 			siteAdaptation = siteAdaptationStorage;
 			if($.isArray(siteAdaptation)) {
@@ -42,85 +42,8 @@
 				}
 			}
 		}
-		if (navigator.onLine){
-			if (confirm("Desea almacenar las páginas candidatas en el sessionStorage?")) {
-				saveCandidates();
-			}	
-		}
-
-		checkStatus();
 	}
 
-	 //Función que comprueba en cada click si la conexión es estable y adapta el comportamiento según el caso.
-	function checkStatus(){
-	 	$("html").on('click', 'a', function(e) {
-			if(navigator.onLine){
-				//console.log("Hay conexión estable: se acepta el click.");
-	  		}
-			else{
-				e.stopImmediatePropagation(); //Intercepto la acción del click
-				e.preventDefault();
-				if (confirm("Error de conexión: desea continuar la navegación?")) {
-					if(sessionStorage[this.href]){
-						//e.preventDefault();
-						document.querySelector('html').innerHTML = sessionStorage[this.href]; // Reemplazo el html acutal por el correspondiente a href.
-						initialize();
-
-					}
-					else{
-						//e.preventDefault();
-						alert("La página a la que desea acceder no se encuentra almacenada en el sessionStorage.");
-					}
-				}
-				else{
-					alert("Permanecerá en la misma página.");
-				}
-			}
-		});
-	 	$("html").on('submit', 'form', function(e) {
-			if(navigator.onLine){
-				//console.log("Hay conexión estable: se genera el submit.");
-			}
-			else{
-				alert("Submit interceptado: No hay conexión a internet.");
-				e.preventDefault();
-			}
-		});
-	}
-
-	//Función que permite almacenar en sessionStorage todas las páginas candidato cacheables, filtrando las que pertenecen al dominio 
-	//en el que estoy y que no son enlaces internos. Luego, almacena también la página actual.
-	function saveCandidates(){
-		var aTag = document.getElementsByTagName("a");
-		var i, j=0;
-	    var substring = "#";
-	    var host = location.hostname; // Obtengo el hostname correspondiente al sitio actual.
-		var url = [];
-		var max = aTag.length; // Determino la cantidad de elementos <a> del sitio (fuera del for para no calcularlo más de una vez).
-		for (i=0; i < max; i++){
-			url.push(aTag[i].href); // Almaceno el contenido de href de cada una de las <a> de la página actual en url[i].
-			// Si la url no es vacía, no se corresponde con un enlace interno (contienen '#') y pertenece el dominio actual (host).
-			if ((url[i]!=="") && !(url[i].includes(substring)) && (url[i].includes(host))){
-				var $urlAux = url [i];
-				j++;
-				// AJAX request de tipo GET, que almacena en sessionStorage el html completo de $urlAux.
-				$.ajax({
-				        'async': false, // Sincrónicamente, de manera que se detenga la navegación hasta almacenar los datos (y que los mismos puedan utilizarse fuera de la request).
-				        'type': "GET",
-				        'url': $urlAux,
-				        'success': function (data) {
-				            sessionStorage[$urlAux] = data;
-				            console.log(j + ': ' + $urlAux + ' almacenado en sessionStorage.');
-				        }
-				});
-			}
-		}
-		//Guardo la página actual
-		j++;
-		sessionStorage[location.href] = document.querySelector('html');
-		console.log(j + ' (página actual) : ' + location.href + ' almacenado en sessionStorage.');
-		alert('Se almacenaron ' + j + ' páginas en el sessionStorage.')
-	}
 
 	function executePageAdaptation(index) {
 		var pageStorage = siteAdaptation[index];
@@ -129,12 +52,12 @@
 	}
 
 	function importJson() {
-		var dataImport = prompt("Importar la configuración. Ingrese el JSON correspondiente");
+		var dataImport = '[{"url":"http://www.redmine.org/","urlCompareType":"contain","template":"material","pageAdaptation":{"header-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/h1[1]"],"pattern":"pattern0"},"navigation-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/DIV[2]/ul[1]"],"pattern":"pattern4"},"main-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[3]/DIV[2]/div[2]"],"pattern":"pattern0"},"footer-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[4]/DIV[1]/div[1]"],"pattern":"pattern0"}}}]';
 		/* La longitud debe tener un minimo de datos para asegurar la estructura inicial del Json. */
 		if(dataImport.length >= 50 ){
-			var siteImport = JSON.parse(dataImport);
+			var siteImport = JSON.parse('[{"url":"http://www.redmine.org/","urlCompareType":"contain","template":"material","pageAdaptation":{"header-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/h1[1]"],"pattern":"pattern0"},"navigation-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/DIV[2]/ul[1]"],"pattern":"pattern4"},"main-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[3]/DIV[2]/div[2]"],"pattern":"pattern0"},"footer-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[4]/DIV[1]/div[1]"],"pattern":"pattern0"}}}]');
 			if($.isArray(siteImport)) {
-				saveLocalSite(siteImport);
+				//saveLocalSite(siteImport);
 				siteAdaptation = siteImport;
 				var index = indexOfCompareByEquals(siteAdaptation, pageUrl, "url");
 				if (index < 0) {
@@ -143,32 +66,32 @@
 				if (index > -1) {
 					executePageAdaptation(index);
 				}
-				alert("Se ha importado correctamente la configuración.");
+				//alert("Se ha importado correctamente la configuración.");
 			}
 			else {
-				alert("Los datos ingresados no tienen un formato válido.");
+				//alert("Los datos ingresados no tienen un formato válido.");
 			}
 		} else {
-			alert("Los datos ingresados no tienen un formato válido.");
+			//alert("Los datos ingresados no tienen un formato válido.");
 		}	
 	}
 
-	function saveLocalSite(site){
-		if (typeof(Storage) !== "undefined") {
-			localStorage.setItem("siteAdaptation", JSON.stringify(site));
-		}
-		else {
-			alert(localStoragedError);
-		}
-	}
+	// function saveLocalSite(site){
+	// 	if (typeof(Storage) !== "undefined") {
+	// 		localStorage.setItem("siteAdaptation", JSON.stringify(site));
+	// 	}
+	// 	else {
+	// 		alert(localStoragedError);
+	// 	}
+	// }
 
-	function getLocalSite(){
-		if (typeof(Storage) !== "undefined") {
-			return JSON.parse(localStorage.getItem("siteAdaptation"));
-		} else {
-			alert(localStoragedError);
-		}
-	}
+	// function getLocalSite(){
+	// 	if (typeof(Storage) !== "undefined") {
+	// 		return JSON.parse(localStorage.getItem("siteAdaptation"));
+	// 	} else {
+	// 		alert(localStoragedError);
+	// 	}
+	// }
 
 	function getElements(xpath){
 		/* Recive algo como obj[0].headerLeft */
@@ -217,7 +140,7 @@
 				object[key] = {"xpath":elem,"pattern":value["pattern"]};
 		});
 		if (error == true){
-			alert(message);
+			//alert(message);
 			return null;
 		}
 		else
@@ -489,15 +412,15 @@
 		return -1;
 	}
 
-	function delLocalSite(){
-		if (typeof(Storage) !== "undefined") {
-			localStorage.removeItem("siteAdaptation");
-			siteAdaptation = [];
-		}
-		else {
-			alert(localStoragedError);
-		}
-	}
+	// function delLocalSite(){
+	// 	if (typeof(Storage) !== "undefined") {
+	// 		localStorage.removeItem("siteAdaptation");
+	// 		siteAdaptation = [];
+	// 	}
+	// 	else {
+	// 		alert(localStoragedError);
+	// 	}
+	// }
 
 	function normalizeUrl(url) {
 		var normalize = url.replace("http://","");
