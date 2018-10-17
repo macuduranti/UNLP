@@ -19,13 +19,19 @@
 		$('head script[src*="jquery"]').remove();
 	}
 
-	GM_registerMenuCommand('Importar adaptacion', importJson);
+	GM_registerMenuCommand('Importar adaptacion (redmine)', importRedmine);
+	GM_registerMenuCommand('Importar adaptacion (JSON)', importJson);
 	//GM_registerMenuCommand('Eliminar datos almacenados', delLocalSite, "L");
 
 	var siteAdaptation = [];
 	var pageUrl = window.location.href;
 	var localStoragedError = "El navegador Web no tiene soporte de almacenamiento Local Storage.";
 	
+	var elements = "body, html, tr, td, th, thead, tbody, li, li a";	//Todos los elementos que no se tomaran en cuenta para exportara
+	var stylesBackground = {"position": "absolute", "left": "0px", "top": "0px", "background": "#000000", "z-index": "2000", "width": "100%", "opacity": "0"};
+	var element_button_click = "";
+	var modal_activated = false; 	
+
 	initialize();
 
 	function initialize() {	
@@ -51,7 +57,7 @@
 		runPage(objectParent,$("body"),$("head"), pageStorage.template);
 	}
 
-	function importJson() {
+	importRedmine(){
 		var dataImport = '[{"url":"http://www.redmine.org/","urlCompareType":"contain","template":"material","pageAdaptation":{"header-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/h1[1]"],"pattern":"pattern0"},"navigation-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/DIV[2]/ul[1]"],"pattern":"pattern4"},"main-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[3]/DIV[2]/div[2]"],"pattern":"pattern0"},"footer-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[4]/DIV[1]/div[1]"],"pattern":"pattern0"}}}]';
 		/* La longitud debe tener un minimo de datos para asegurar la estructura inicial del Json. */
 		if(dataImport.length >= 50 ){
@@ -76,22 +82,43 @@
 		}	
 	}
 
-	// function saveLocalSite(site){
-	// 	if (typeof(Storage) !== "undefined") {
-	// 		localStorage.setItem("siteAdaptation", JSON.stringify(site));
-	// 	}
-	// 	else {
-	// 		alert(localStoragedError);
-	// 	}
-	// }
-
-	// function getLocalSite(){
-	// 	if (typeof(Storage) !== "undefined") {
-	// 		return JSON.parse(localStorage.getItem("siteAdaptation"));
-	// 	} else {
-	// 		alert(localStoragedError);
-	// 	}
-	// }
+	function importJson() {
+		$("body").append("<div id= 'aryta-cartel' style='width: 50%; padding: 10px; margin: auto auto;'></div>");
+		$("#aryta-cartel").append("<h1> Importar configuración </h1> <br/>");
+		$("#aryta-cartel").append("<b>Ingrese el JSON correspondiente: </b>" +
+			"<input type='text' id='dataImport' name='dataImport' size='50' maxlength=''>" +
+			"<br/> <br/> <br/>");
+		$("#aryta-cartel").append("<input id='dataAceptar' type='button' value='Aceptar'/>&nbsp;&nbsp;");
+		$("#aryta-cartel").append("<input id='dataCancel' type='button' value='Cancelar'/>");
+		$("#dataCancel").on("click", function(){
+			closeModal($("[id='aryta-cartel']"));
+		});
+		$("#dataAceptar").on("click", function(){
+			var dataImport = $("#dataImport").val();
+			/* La longitud debe tener un minimo de datos para asegurar la estructura inicial del Json. */
+			/* La longitud debe tener un minimo de datos para asegurar la estructura inicial del Json. */
+			if(dataImport.length >= 50 ){
+				var siteImport = JSON.parse('[{"url":"http://www.redmine.org/","urlCompareType":"contain","template":"material","pageAdaptation":{"header-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/h1[1]"],"pattern":"pattern0"},"navigation-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/DIV[2]/ul[1]"],"pattern":"pattern4"},"main-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[3]/DIV[2]/div[2]"],"pattern":"pattern0"},"footer-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[4]/DIV[1]/div[1]"],"pattern":"pattern0"}}}]');
+				if($.isArray(siteImport)) {
+					//saveLocalSite(siteImport);
+					siteAdaptation = siteImport;
+					var index = indexOfCompareByEquals(siteAdaptation, pageUrl, "url");
+					if (index < 0) {
+						index = indexOfCompareByIncludes(siteAdaptation, pageUrl, "url");
+					}
+					if (index > -1) {
+						executePageAdaptation(index);
+					}
+					//alert("Se ha importado correctamente la configuración.");
+				}
+				else {
+					//alert("Los datos ingresados no tienen un formato válido.");
+				}
+			} else {
+				//alert("Los datos ingresados no tienen un formato válido.");
+			}	
+		});
+	}
 
 	function getElements(xpath){
 		/* Recive algo como obj[0].headerLeft */
@@ -145,6 +172,72 @@
 		}
 		else
 			return object;
+	}
+
+	function getOriginalStyles(savedElement){
+		var originalBorder = $(savedElement).attr("aryta-border");
+		var originalBackground = $(savedElement).attr("aryta-background");
+		var stylesOriginal = {"background-color": originalBackground, border: originalBorder};
+		$(savedElement).css(stylesOriginal);
+	}
+
+
+	// Funcion que se encarga de cerrar el div modal y su fondo, y recupera los estilos por defecto del elemento resaltado.
+	function closeModal(elementToRemove){
+		//Se elimina el fondo del modal
+		$("#backgroundModal").remove();
+		$("#backgroundModal").fadeTo(400, 0, function(){$("#backgroundModal").remove();});
+		getOriginalStyles($("*[aryta-border]"));
+
+		//Se elimina el div que contiene el elemento clonado y el menu de botones.
+		$(elementToRemove).remove(); // Elimina el div.
+
+		/* == Codigo embebido de Diego, para habilitar nuevamente los eventos del menu de botones === */
+		modal_activated = false;
+	}
+
+	// Funcion que le agrega los estilos al elemento clonado que sea parte del Modal
+	function stylesModal(cloned){
+		var clonedPosition = "fixed";
+		var clonedZIndex = "3000";
+		var clonedBackgroundColor;
+		if(cloned.css("background-color") == "transparent" || cloned.css("background-color") == "rgba(0, 0, 0, 0)"){
+			clonedBackgroundColor = "white";
+		}
+		else{
+			clonedBackgroundColor = cloned.css("background-color");
+		}
+		var stylesCloned = {'position' : clonedPosition, 'z-index': clonedZIndex, 'background-color': clonedBackgroundColor};
+		if ($("#main-menu").length) {
+			$("#main-menu").css("bottom", "auto");
+		}
+		cloned.css(stylesCloned);
+	}
+
+	// Funcion que calcula el tamaño y posicion del elemento clonado para posicionar el Modal
+	function sizeModal(cloned){
+		var winH = $(window).height();
+		var winW = $(window).width();
+		var clonedTop;
+		var menu = $("#BackgroundMenuButton");
+		var element = $(menu).prev();
+		if(cloned.height() < winH){
+			clonedTop = (winH/2)-(cloned.height()/2);
+		}
+		else{
+			clonedTop = 100;
+			$(element).height(winH - $(menu).height() - 200);
+			$(element).css({overflow: "scroll"});
+		}
+		var clonedLeft;
+		if((cloned.width() < winW)) {
+			clonedLeft = (winW/2)-(cloned.width()/2);
+		}
+		else{
+			clonedLeft = 0;
+		}
+		var stylesCloned = {left: clonedLeft, top: 120};
+		cloned.css(stylesCloned);
 	}
 
 	function runPage(objectParent, iBody, iHead, pageTemplate){
