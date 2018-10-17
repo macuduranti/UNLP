@@ -21,7 +21,7 @@
 
 	GM_registerMenuCommand('Importar adaptacion (redmine)', importRedmine);
 	GM_registerMenuCommand('Importar adaptacion (JSON)', importJson);
-	//GM_registerMenuCommand('Eliminar datos almacenados', delLocalSite, "L");
+	GM_registerMenuCommand('Eliminar datos almacenados', delLocalSite, "L");
 
 	var siteAdaptation = [];
 	var pageUrl = window.location.href;
@@ -35,7 +35,8 @@
 	initialize();
 
 	function initialize() {	
-		var siteAdaptationStorage = siteAdaptation;
+		//var siteAdaptationStorage = siteAdaptation;
+		var siteAdaptationStorage = getLocalSite();
 		if (siteAdaptationStorage) {
 			siteAdaptation = siteAdaptationStorage;
 			if($.isArray(siteAdaptation)) {
@@ -63,7 +64,7 @@
 		if(dataImport.length >= 50 ){
 			var siteImport = JSON.parse('[{"url":"http://www.redmine.org/","urlCompareType":"contain","template":"material","pageAdaptation":{"header-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/h1[1]"],"pattern":"pattern0"},"navigation-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/DIV[2]/ul[1]"],"pattern":"pattern4"},"main-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[3]/DIV[2]/div[2]"],"pattern":"pattern0"},"footer-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[4]/DIV[1]/div[1]"],"pattern":"pattern0"}}}]');
 			if($.isArray(siteImport)) {
-				//saveLocalSite(siteImport);
+				saveLocalSite(siteImport);
 				siteAdaptation = siteImport;
 				var index = indexOfCompareByEquals(siteAdaptation, pageUrl, "url");
 				if (index < 0) {
@@ -83,58 +84,61 @@
 	}
 
 	function importJson() {
-		$("body").append("<div id= 'aryta-cartel' style='width: 50%; padding: 10px; margin: auto auto;'></div>");
-		$("#aryta-cartel").append("<h1> Importar configuración </h1> <br/>");
-		$("#aryta-cartel").append("<b>Ingrese el JSON correspondiente: </b>" +
-			"<input type='text' id='dataImport' name='dataImport' size='50' maxlength=''>" +
-			"<br/> <br/> <br/>");
-		$("#aryta-cartel").append("<input id='dataAceptar' type='button' value='Aceptar'/>&nbsp;&nbsp;");
-		$("#aryta-cartel").append("<input id='dataCancel' type='button' value='Cancelar'/>");
-		$("#dataCancel").on("click", function(){
-			closeModal($("[id='aryta-cartel']"));
-		});
-		$("#dataAceptar").on("click", function(){
-			var dataImport = $("#dataImport").val();
-			/* La longitud debe tener un minimo de datos para asegurar la estructura inicial del Json. */
-			if(dataImport.length >= 50 ){
-				var siteImport = JSON.parse('[{"url":"http://www.redmine.org/","urlCompareType":"contain","template":"material","pageAdaptation":{"header-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/h1[1]"],"pattern":"pattern0"},"navigation-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/DIV[2]/ul[1]"],"pattern":"pattern4"},"main-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[3]/DIV[2]/div[2]"],"pattern":"pattern0"},"footer-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[4]/DIV[1]/div[1]"],"pattern":"pattern0"}}}]');
-				if($.isArray(siteImport)) {
-					//saveLocalSite(siteImport);
-					siteAdaptation = siteImport;
-					var index = indexOfCompareByEquals(siteAdaptation, pageUrl, "url");
-					if (index < 0) {
-						index = indexOfCompareByIncludes(siteAdaptation, pageUrl, "url");
+		if(!modal_activated){
+			$("body").append("<div id= 'aryta-cartel' style='width: 50%; padding: 10px; margin: auto auto;'></div>");
+			$("#aryta-cartel").append("<h1> Importar configuración </h1> <br/>");
+			$("#aryta-cartel").append("<b>Ingrese el JSON correspondiente: </b>" +
+				"<input type='text' id='dataImport' name='dataImport' size='50' maxlength=''>" +
+				"<br/> <br/> <br/>");
+			$("#aryta-cartel").append("<input id='dataAceptar' type='button' value='Aceptar'/>&nbsp;&nbsp;");
+			$("#aryta-cartel").append("<input id='dataCancel' type='button' value='Cancelar'/>");
+			$("#dataCancel").on("click", function(){
+				closeModal($("[id='aryta-cartel']"));
+			});
+			$("#dataAceptar").on("click", function(){
+				var dataImport = $("#dataImport").val();
+				/* La longitud debe tener un minimo de datos para asegurar la estructura inicial del Json. */
+				if(dataImport.length >= 50 ){
+					var siteImport = JSON.parse('[{"url":"http://www.redmine.org/","urlCompareType":"contain","template":"material","pageAdaptation":{"header-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/h1[1]"],"pattern":"pattern0"},"navigation-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/DIV[2]/ul[1]"],"pattern":"pattern4"},"main-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[3]/DIV[2]/div[2]"],"pattern":"pattern0"},"footer-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[4]/DIV[1]/div[1]"],"pattern":"pattern0"}}}]');
+					if($.isArray(siteImport)) {
+						//saveLocalSite(siteImport);
+						siteAdaptation = siteImport;
+						var index = indexOfCompareByEquals(siteAdaptation, pageUrl, "url");
+						if (index < 0) {
+							index = indexOfCompareByIncludes(siteAdaptation, pageUrl, "url");
+						}
+						if (index > -1) {
+							executePageAdaptation(index);
+						}
+						//alert("Se ha importado correctamente la configuración.");
 					}
-					if (index > -1) {
-						executePageAdaptation(index);
+					else {
+						//alert("Los datos ingresados no tienen un formato válido.");
 					}
-					//alert("Se ha importado correctamente la configuración.");
-				}
-				else {
+				} else {
 					//alert("Los datos ingresados no tienen un formato válido.");
-				}
-			} else {
-				//alert("Los datos ingresados no tienen un formato válido.");
-			}	
-		});
-		// Se le asigna los estilos de resaltado al elemento clonado mediante una funcion. En otra funcion separada se le asignan los tamaños.
-		stylesModal($("#aryta-cartel")); // ID del div que contiene al clon y a los botones
-		sizeModal($("#aryta-cartel"));
+				}	
+			});
+			// Se le asigna los estilos de resaltado al elemento clonado mediante una funcion. En otra funcion separada se le asignan los tamaños.
+			stylesModal($("#aryta-cartel")); // ID del div que contiene al clon y a los botones
+			sizeModal($("#aryta-cartel"));
 
 
 
-		// Se guarda la altura del documento para poder asignarsela al fondo del modal.
-		var altura=$(document).height();
+			// Se guarda la altura del documento para poder asignarsela al fondo del modal.
+			var altura=$(document).height();
 
-		// Se crea el fondo como hijo del elemento body y se le agregan los estilos asignados al principio del documento y se le asigna la altura del documento.
-		// Se utiliza la funcion fadeTo de Jquery para una transicion que ayudara a la visual.
-		$("body").append("<div id='backgroundModal'></div>");
-		$("#backgroundModal").css(stylesBackground);
-		$("#backgroundModal").fadeTo(400, 0.7);
-		$("#backgroundModal").height(altura);
+			// Se crea el fondo como hijo del elemento body y se le agregan los estilos asignados al principio del documento y se le asigna la altura del documento.
+			// Se utiliza la funcion fadeTo de Jquery para una transicion que ayudara a la visual.
+			$("body").append("<div id='backgroundModal'></div>");
+			$("#backgroundModal").css(stylesBackground);
+			$("#backgroundModal").fadeTo(400, 0.7);
+			$("#backgroundModal").height(altura);
+			modal_activated = true;
 
-		// Se le asigna el evento click al fondo para que cuando ocurra se cierre el modal.
-		$("#backgroundModal").on("click", function(){closeModal($("[id='aryta-cartel']"));});
+			// Se le asigna el evento click al fondo para que cuando ocurra se cierre el modal.
+			$("#backgroundModal").on("click", function(){closeModal($("[id='aryta-cartel']")); modal_activated=false;});
+		}
 	}
 
 	function getElements(xpath){
@@ -521,15 +525,32 @@
 		return -1;
 	}
 
-	// function delLocalSite(){
-	// 	if (typeof(Storage) !== "undefined") {
-	// 		localStorage.removeItem("siteAdaptation");
-	// 		siteAdaptation = [];
-	// 	}
-	// 	else {
-	// 		alert(localStoragedError);
-	// 	}
-	// }
+	function delLocalSite(){
+		if (typeof(Storage) !== "undefined") {
+			sessionStorage.removeItem("siteAdaptation");
+			siteAdaptation = [];
+		}
+		else {
+			//alert(localStoragedError);
+		}
+	}
+
+	function saveLocalSite(site){
+		if (typeof(Storage) !== "undefined") {
+			sessionStorage.setItem("siteAdaptation", JSON.stringify(site));
+		}
+		else {
+			//alert(localStoragedError);
+		}
+	}
+
+	function getLocalSite(){
+		if (typeof(Storage) !== "undefined") {
+			return JSON.parse(sessionStorage.getItem("siteAdaptation"));
+		} else {
+			//alert(localStoragedError);
+		}
+	}
 
 	function normalizeUrl(url) {
 		var normalize = url.replace("http://","");
