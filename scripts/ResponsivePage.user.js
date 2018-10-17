@@ -57,7 +57,7 @@
 		runPage(objectParent,$("body"),$("head"), pageStorage.template);
 	}
 
-	importRedmine(){
+	function importRedmine(){
 		var dataImport = '[{"url":"http://www.redmine.org/","urlCompareType":"contain","template":"material","pageAdaptation":{"header-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/h1[1]"],"pattern":"pattern0"},"navigation-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/DIV[2]/ul[1]"],"pattern":"pattern4"},"main-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[3]/DIV[2]/div[2]"],"pattern":"pattern0"},"footer-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[4]/DIV[1]/div[1]"],"pattern":"pattern0"}}}]';
 		/* La longitud debe tener un minimo de datos para asegurar la estructura inicial del Json. */
 		if(dataImport.length >= 50 ){
@@ -96,7 +96,6 @@
 		$("#dataAceptar").on("click", function(){
 			var dataImport = $("#dataImport").val();
 			/* La longitud debe tener un minimo de datos para asegurar la estructura inicial del Json. */
-			/* La longitud debe tener un minimo de datos para asegurar la estructura inicial del Json. */
 			if(dataImport.length >= 50 ){
 				var siteImport = JSON.parse('[{"url":"http://www.redmine.org/","urlCompareType":"contain","template":"material","pageAdaptation":{"header-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/h1[1]"],"pattern":"pattern0"},"navigation-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/DIV[2]/ul[1]"],"pattern":"pattern4"},"main-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[3]/DIV[2]/div[2]"],"pattern":"pattern0"},"footer-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[4]/DIV[1]/div[1]"],"pattern":"pattern0"}}}]');
 				if($.isArray(siteImport)) {
@@ -118,6 +117,24 @@
 				//alert("Los datos ingresados no tienen un formato válido.");
 			}	
 		});
+		// Se le asigna los estilos de resaltado al elemento clonado mediante una funcion. En otra funcion separada se le asignan los tamaños.
+		stylesModal($("#aryta-cartel")); // ID del div que contiene al clon y a los botones
+		sizeModal($("#aryta-cartel"));
+
+
+
+		// Se guarda la altura del documento para poder asignarsela al fondo del modal.
+		var altura=$(document).height();
+
+		// Se crea el fondo como hijo del elemento body y se le agregan los estilos asignados al principio del documento y se le asigna la altura del documento.
+		// Se utiliza la funcion fadeTo de Jquery para una transicion que ayudara a la visual.
+		$("body").append("<div id='backgroundModal'></div>");
+		$("#backgroundModal").css(stylesBackground);
+		$("#backgroundModal").fadeTo(400, 0.7);
+		$("#backgroundModal").height(altura);
+
+		// Se le asigna el evento click al fondo para que cuando ocurra se cierre el modal.
+		$("#backgroundModal").on("click", function(){closeModal($("[id='aryta-cartel']"));});
 	}
 
 	function getElements(xpath){
