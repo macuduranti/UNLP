@@ -20,7 +20,7 @@
 	}
 
 	GM_registerMenuCommand('Importar adaptacion', importJson);
-	GM_registerMenuCommand('Eliminar datos almacenados', delLocalSite, "L");
+	//GM_registerMenuCommand('Eliminar datos almacenados', delLocalSite, "L");
 
 	var siteAdaptation = [];
 	var pageUrl = window.location.href;
@@ -29,7 +29,7 @@
 	initialize();
 
 	function initialize() {	
-		var siteAdaptationStorage = getLocalSite();
+		var siteAdaptationStorage = siteAdaptation;
 		if (siteAdaptationStorage) {
 			siteAdaptation = siteAdaptationStorage;
 			if($.isArray(siteAdaptation)) {
@@ -57,7 +57,7 @@
 		if(dataImport.length >= 50 ){
 			var siteImport = JSON.parse('[{"url":"http://www.redmine.org/","urlCompareType":"contain","template":"material","pageAdaptation":{"header-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/h1[1]"],"pattern":"pattern0"},"navigation-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[2]/DIV[2]/ul[1]"],"pattern":"pattern4"},"main-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[1]/DIV[3]/DIV[2]/div[2]"],"pattern":"pattern0"},"footer-0":{"xpath":["/html/body/DIV[1]/DIV[1]/DIV[4]/DIV[1]/div[1]"],"pattern":"pattern0"}}}]');
 			if($.isArray(siteImport)) {
-				saveLocalSite(siteImport);
+				//saveLocalSite(siteImport);
 				siteAdaptation = siteImport;
 				var index = indexOfCompareByEquals(siteAdaptation, pageUrl, "url");
 				if (index < 0) {
@@ -76,22 +76,22 @@
 		}	
 	}
 
-	function saveLocalSite(site){
-		if (typeof(Storage) !== "undefined") {
-			localStorage.setItem("siteAdaptation", JSON.stringify(site));
-		}
-		else {
-			alert(localStoragedError);
-		}
-	}
+	// function saveLocalSite(site){
+	// 	if (typeof(Storage) !== "undefined") {
+	// 		localStorage.setItem("siteAdaptation", JSON.stringify(site));
+	// 	}
+	// 	else {
+	// 		alert(localStoragedError);
+	// 	}
+	// }
 
-	function getLocalSite(){
-		if (typeof(Storage) !== "undefined") {
-			return JSON.parse(localStorage.getItem("siteAdaptation"));
-		} else {
-			alert(localStoragedError);
-		}
-	}
+	// function getLocalSite(){
+	// 	if (typeof(Storage) !== "undefined") {
+	// 		return JSON.parse(localStorage.getItem("siteAdaptation"));
+	// 	} else {
+	// 		alert(localStoragedError);
+	// 	}
+	// }
 
 	function getElements(xpath){
 		/* Recive algo como obj[0].headerLeft */
@@ -411,15 +411,15 @@
 		return -1;
 	}
 
-	function delLocalSite(){
-		if (typeof(Storage) !== "undefined") {
-			localStorage.removeItem("siteAdaptation");
-			siteAdaptation = [];
-		}
-		else {
-			alert(localStoragedError);
-		}
-	}
+	// function delLocalSite(){
+	// 	if (typeof(Storage) !== "undefined") {
+	// 		localStorage.removeItem("siteAdaptation");
+	// 		siteAdaptation = [];
+	// 	}
+	// 	else {
+	// 		alert(localStoragedError);
+	// 	}
+	// }
 
 	function normalizeUrl(url) {
 		var normalize = url.replace("http://","");
