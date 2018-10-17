@@ -78,7 +78,7 @@
 
 	function saveLocalSite(site){
 		if (typeof(Storage) !== "undefined") {
-			localStorage.setItem("siteAdaptation", JSON.stringify(site));
+			window.localStorage.setItem("siteAdaptation", JSON.stringify(site));
 		}
 		else {
 			alert(localStoragedError);
@@ -413,7 +413,7 @@
 
 	function delLocalSite(){
 		if (typeof(Storage) !== "undefined") {
-			localStorage.removeItem("siteAdaptation");
+			window.localStorage.removeItem("siteAdaptation");
 			siteAdaptation = [];
 		}
 		else {
