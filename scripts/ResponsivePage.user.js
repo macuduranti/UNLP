@@ -257,7 +257,7 @@
 				"}</style>");
 				iHead.append("<style> #view-source {position: fixed; display: block; right: 0; bottom: 0; margin-right: 40px; margin-bottom: 40px; z-index: 900; } </style>");
 				iBody.append("<div class='mdl-layout mdl-js-layout mdl-layout--fixed-header'><div class='android-header mdl-layout__header mdl-layout__header--waterfall is-casting-shadow is-compact'>"+
-                "<div aria-expanded='false' role='button' tabindex='0' class='mdl-layout__drawer-button' id='drwrbtn'><i class='material-icons' style='font-size: 48px; margin-top: -30px'>≡</i></div> <div class='mdl-layout__header-row'>"+
+                "<div aria-expanded='false' role='button' tabindex='0' class='mdl-layout__drawer-button' id='drwrbtn'><i class='material-icons' style='font-size: 48px; margin-top: -25px'>≡</i></div> <div class='mdl-layout__header-row'>"+
 				"<span class='android-title mdl-layout-title'><div id='header-0' style='color: #8bc34a;'></div></span><div class='android-header-spacer mdl-layout-spacer'></div>"+
 				"<div class='android-navigation-container'><nav class='android-navigation mdl-navigation' id='navigation-0'></nav></div>"+
 				"<span class='android-mobile-title mdl-layout-title'><div id='header-1'></div></span></div></div>"+
@@ -266,8 +266,7 @@
 				"<div class='mdl-mega-footer--top-section'><div class='mdl-mega-footer--right-section'><a class='mdl-typography--font-light' href='#top'>Volver Arriba<i class='material-icons'>expand_less</i></a></div></div>"+
 				"<div class='mdl-mega-footer--middle-section mdl-typography--font-light' id='footer-0'></div>"+
 				"<div class='mdl-mega-footer--bottom-section' id='navigation-2'></div></footer></div>"+
-                "<div class='mdl-layout__obfuscator' id='bfsctr'></div></div>"+
-				"<a href='' target='_blank' id='view-source' class='mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-color--accent mdl-color-text--accent-contrast'>Ver Original</a>");
+                "<div class='mdl-layout__obfuscator' id='bfsctr'></div></div>");
 				importElement(objectParent["header-0"],"#header-0",iBody);
 				importElement(objectParent["header-0"],"#header-1",iBody);
 				importElement(objectParent["header-0"],"#header-2",iBody);
