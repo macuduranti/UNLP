@@ -19,7 +19,7 @@
 		$('head script[src*="jquery"]').remove();
 	}
 
-	GM_registerMenuCommand('Importar adaptación', importJson);
+	GM_registerMenuCommand('Importar adaptacion', importJson);
 	//GM_registerMenuCommand('Eliminar datos almacenados', delLocalSite, "L");
 
 	var siteAdaptation = [];
